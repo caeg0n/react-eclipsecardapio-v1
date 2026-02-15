@@ -51,13 +51,19 @@ if not exist "script.js" (
 set "OWNER=%~1"
 if "%OWNER%"=="" set "OWNER=%GITHUB_USER%"
 if "%OWNER%"=="" (
-  set /p OWNER=Informe o usuario/org do GitHub: 
+  set "OWNER=caeg0n"
+  set "OWNER_IN="
+  set /p OWNER_IN=Informe o usuario/org do GitHub [caeg0n]: 
+  if not "%OWNER_IN%"=="" set "OWNER=%OWNER_IN%"
 )
 
 set "REPO=%~2"
 if "%REPO%"=="" set "REPO=%GITHUB_REPO%"
 if "%REPO%"=="" (
-  set /p REPO=Informe o nome do repositorio: 
+  set "REPO=react-eclipsecardapio-v1"
+  set "REPO_IN="
+  set /p REPO_IN=Informe o nome do repositorio [react-eclipsecardapio-v1]: 
+  if not "%REPO_IN%"=="" set "REPO=%REPO_IN%"
 )
 
 set "ARG3=%~3"
