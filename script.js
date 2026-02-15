@@ -1,4 +1,18 @@
-const menuData = Array.isArray(window.MENU_DATA) ? window.MENU_DATA : [];
+async function loadMenuData() {
+  // Prefer a fresh copy from the network (GitHub Pages CDN can cache script tags).
+  // Fallback to window.MENU_DATA for local file:// usage.
+  try {
+    const res = await fetch(`menu-data.js?ts=${Date.now()}`, { cache: "no-store" });
+    if (!res.ok) throw new Error("Failed to fetch menu-data.js");
+    const code = await res.text();
+    const sandboxWindow = {};
+    const data = new Function("window", `${code}\nreturn window.MENU_DATA;`)(sandboxWindow);
+    if (Array.isArray(data)) return data;
+  } catch (_err) {
+    // ignore
+  }
+  return Array.isArray(window.MENU_DATA) ? window.MENU_DATA : [];
+}
 
 function parsePriceToNumber(price) {
   if (!price) return Number.POSITIVE_INFINITY;
@@ -56,7 +70,7 @@ function renderSectionContent(section) {
   return renderItems(section.items, section.sortByPrice);
 }
 
-function renderMenu() {
+function renderMenu(menuData) {
   const nav = document.getElementById("menu-nav");
   const root = document.getElementById("menu-root");
 
@@ -101,5 +115,10 @@ function setupReveal() {
   document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 }
 
-renderMenu();
-setupReveal();
+async function init() {
+  const menuData = await loadMenuData();
+  renderMenu(menuData);
+  setupReveal();
+}
+
+init();
