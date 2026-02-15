@@ -25,6 +25,22 @@
     return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
+  function parsePriceToNumber(price) {
+    if (!price) return Number.POSITIVE_INFINITY;
+    const normalized = String(price)
+      .replace(/[^\d,.-]/g, "")
+      .replace(/\./g, "")
+      .replace(",", ".");
+    const value = Number(normalized);
+    return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+  }
+
+  function sortItemsIfNeeded(items, sortByPrice) {
+    if (!Array.isArray(items)) return [];
+    if (!sortByPrice) return items;
+    return [...items].sort((a, b) => parsePriceToNumber(a.price) - parsePriceToNumber(b.price));
+  }
+
   async function loadMenuData() {
     // Cache-bust to avoid CDN surprises after admin edits.
     const url = `${MENU_URL}?ts=${Date.now()}`;
@@ -197,28 +213,27 @@
     return `${sectionId}::${groupTitle || ""}::${itemName}`;
   }
 
-  function renderItems(sectionId, groupTitle, items) {
+  function renderItems(sectionId, groupTitle, items, sortByPrice) {
     if (!Array.isArray(items) || !items.length) return "";
+    const finalItems = sortItemsIfNeeded(items, sortByPrice);
     return `
-      <div class="buy-grid">
-        ${items
+      <div class="menu-grid">
+        ${finalItems
           .map((it) => {
             const cents = parsePriceToCents(it.price);
             const hasPrice = Number.isFinite(cents);
             const key = itemKey(sectionId, groupTitle, it.name || "");
-            const desc = it.desc ? `<p class="buy-desc">${escapeHtml(it.desc)}</p>` : "";
-            const price = hasPrice
-              ? `<span class="buy-price">${escapeHtml(it.price)}</span>`
-              : `<span class="buy-price" style="opacity:.65">Sem preço</span>`;
+            const desc = it.desc ? `<p class="item-desc">${escapeHtml(it.desc)}</p>` : "";
+            const price = hasPrice && it.price ? `<span class="price">${escapeHtml(it.price)}</span>` : "";
 
             return `
-              <div class="buy-row" data-item-key="${escapeAttr(key)}">
-                <div class="buy-main">
-                  <p class="buy-name">${escapeHtml(it.name || "")}</p>
-                  ${desc}
-                  <div class="buy-meta">${price}</div>
+              <article class="item" data-item-key="${escapeAttr(key)}">
+                <div class="item-top">
+                  <h3 class="item-name">${escapeHtml(it.name || "")}</h3>
+                  ${price}
                 </div>
-                <div class="buy-controls">
+                ${desc}
+                <div class="item-actions">
                   <button
                     class="qty-btn"
                     type="button"
@@ -243,7 +258,7 @@
                     </svg>
                   </button>
                 </div>
-              </div>
+              </article>
             `;
           })
           .join("")}
@@ -264,19 +279,19 @@
               <div class="menu-subgroup">
                 ${title}
                 ${note}
-                ${renderItems(section.id, g.title || "", g.items)}
+                ${renderItems(section.id, g.title || "", g.items, section.sortByPrice || g.sortByPrice)}
               </div>
             `;
           })
           .join("")
-      : renderItems(section.id, "", items || []);
+      : renderItems(section.id, "", items || [], section.sortByPrice);
 
     return `
       <section class="menu-section reveal" id="${escapeAttr(section.id)}">
         <div class="section-head">
           <h2>${escapeHtml(section.title || "")}</h2>
+          ${section.note ? `<p class="section-note">${escapeHtml(section.note)}</p>` : ""}
         </div>
-        ${section.note ? `<p class="section-note">${escapeHtml(section.note)}</p>` : ""}
         ${inner}
       </section>
     `;
@@ -310,7 +325,7 @@
       const act = btn.getAttribute("data-act");
 
       if (act === "qty") {
-        const row = btn.closest(".buy-row");
+        const row = btn.closest(".item");
         if (!row) return;
         const valEl = $(".qty-val", btn);
         const cur = Number(valEl?.textContent || 1);
@@ -320,7 +335,7 @@
       }
 
       if (act === "add") {
-        const row = btn.closest(".buy-row");
+        const row = btn.closest(".item");
         if (!row) return;
         const key = row.getAttribute("data-item-key");
         const item = itemIndex.get(key);
