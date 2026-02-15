@@ -82,6 +82,9 @@ if not "%DOMAIN%"=="" (
 
 set "TOKEN=%GITHUB_TOKEN%"
 if "%TOKEN%"=="" (
+  for /f %%I in ('gh auth token 2^>nul') do set "TOKEN=%%I"
+)
+if "%TOKEN%"=="" (
   set /p TOKEN=Informe seu GITHUB_TOKEN - classic com repo ou fine-grained com conteudo+pages: 
 )
 
