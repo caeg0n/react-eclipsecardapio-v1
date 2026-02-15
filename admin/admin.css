@@ -96,6 +96,50 @@ main {
   pointer-events: none;
 }
 
+.key-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.key-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.key-card {
+  width: min(520px, calc(100vw - 32px));
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, #161616 0%, #0d0d0d 70%);
+  padding: 18px;
+  color: var(--ink);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.55);
+}
+
+.key-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+}
+
+.key-card input {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid #2f2f2f;
+  background: #151515;
+  color: var(--ink);
+  padding: 10px 12px;
+  font-family: inherit;
+}
+
+.key-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .remote-settings {
   display: none;
 }

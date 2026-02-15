@@ -173,7 +173,48 @@ if not exist ".gitignore" (
 )
 
 echo.
-echo [5/9] Configurando dominio customizado...
+echo [5/10] Gerando token criptografado do Admin (opcional)...
+where node >nul 2>nul
+if errorlevel 1 (
+  echo Node nao encontrado. Pulando geracao do token criptografado do Admin.
+) else (
+  if exist "admin\\admin.js" (
+    findstr /C:"const embeddedEncryptedToken = null" "admin\\admin.js" >nul 2>nul
+    if not errorlevel 1 (
+      set "DO_ENCRYPT=N"
+      set /p DO_ENCRYPT=Gerar ou atualizar token criptografado do Admin? [s/N]: 
+      if /I "!DO_ENCRYPT!"=="S" (
+        powershell -NoProfile -Command ^
+          "$ErrorActionPreference='Stop';" ^
+          "$t=Read-Host 'GitHub token para salvar menu-data.js' -AsSecureString;" ^
+          "$k=Read-Host 'Chave do Admin' -AsSecureString;" ^
+          "$pt=[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($t));" ^
+          "$pk=[Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($k));" ^
+          "$blob=($pt + \"`n\" + $pk) | node admin\\encrypt-token.mjs --stdin;" ^
+          "Set-Content -Path admin\\token-blob.json -Value $blob -Encoding utf8;" ^
+          "$js=Get-Content admin\\admin.js -Raw;" ^
+          "$json=(Get-Content admin\\token-blob.json -Raw).Trim();" ^
+          "$js=$js -replace 'const embeddedEncryptedToken = null;', ('const embeddedEncryptedToken = ' + $json + ';');" ^
+          "Set-Content -Path admin\\admin.js -Value $js -Encoding utf8;" ^
+          "Remove-Item -Force admin\\token-blob.json;"
+        if errorlevel 1 (
+          echo [AVISO] Falha ao gerar/injetar token criptografado. Continuando sem isso.
+        ) else (
+          echo Token criptografado do Admin gerado e injetado em admin\\admin.js
+        )
+      ) else (
+        echo Pulando geracao do token criptografado do Admin.
+      )
+    ) else (
+      echo Admin ja parece estar configurado ^(embeddedEncryptedToken nao esta como null^) . Pulando.
+    )
+  ) else (
+    echo Pasta admin nao encontrada. Pulando.
+  )
+)
+
+echo.
+echo [6/10] Configurando dominio customizado...
 if "%PROVISIONAL_DEPLOY%"=="1" (
   if exist "CNAME" (
     del /q "CNAME" >nul 2>nul
@@ -195,7 +236,7 @@ if "%PROVISIONAL_DEPLOY%"=="1" (
 )
 
 echo.
-echo [6/9] Commitando arquivos...
+echo [7/10] Commitando arquivos...
 git add .
 git diff --cached --quiet
 if errorlevel 1 (
@@ -205,7 +246,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [7/9] Enviando para GitHub (branch main)...
+echo [8/10] Enviando para GitHub (branch main)...
 git push -u origin main
 if errorlevel 1 (
   echo [ERRO] Falha no push. Verifique permissao do token/repositorio.
@@ -213,7 +254,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [8/9] Ativando GitHub Pages via API...
+echo [9/10] Ativando GitHub Pages via API...
 curl -s -o "%TEMP%\gh_pages.json" -w "%%{http_code}" ^
   -X POST ^
   -H "Authorization: token %TOKEN%" ^
@@ -241,7 +282,7 @@ if "%PAGES_STATUS%"=="201" (
 del /q "%TEMP%\gh_pages.json" >nul 2>nul
 
 echo.
-echo [9/9] Publicacao concluida.
+echo [10/10] Publicacao concluida.
 if not "%DOMAIN%"=="" (
   echo URL final apos DNS: https://%DOMAIN%/
   echo.

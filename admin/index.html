@@ -40,6 +40,24 @@
       <textarea id="editor" spellcheck="false"></textarea>
     </main>
 
+    <dialog id="key-dialog" class="key-dialog">
+      <form method="dialog" class="key-card">
+        <h2>Chave de acesso</h2>
+        <p class="subtle">Digite a chave para liberar o salvamento no GitHub.</p>
+        <input
+          id="key-input"
+          type="password"
+          placeholder="Sua chave"
+          autocomplete="current-password"
+        />
+        <div class="key-actions">
+          <button value="cancel" class="btn btn-ghost" type="submit">Cancelar</button>
+          <button id="key-confirm" value="ok" class="btn btn-primary" type="submit">Desbloquear</button>
+        </div>
+        <p class="hint">A chave não sai do navegador. Ela só desbloqueia o token criptografado.</p>
+      </form>
+    </dialog>
+
     <section class="helper">
       <h2>Como aplicar</h2>
       <ol>
@@ -50,6 +68,7 @@
       </ol>
     </section>
 
+    <script src="../menu-data.js"></script>
     <script src="admin.js"></script>
   </body>
 </html>

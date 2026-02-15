@@ -8,15 +8,17 @@ const ownerInput = document.getElementById("owner");
 const repoInput = document.getElementById("repo");
 const branchInput = document.getElementById("branch");
 const pathInput = document.getElementById("path");
-const tokenInput = document.getElementById("token");
 
 const storageKey = "menuAdminSettings";
+const tokenStorageKey = "menuAdminTokenB64";
+// Encrypted token blob (AES-GCM). Generate once with the helper script and paste here.
+// Format: { saltB64, ivB64, dataB64, iterations }
+const embeddedEncryptedToken = null;
 const defaultSettings = {
   owner: ownerInput.value,
   repo: repoInput.value,
   branch: branchInput.value,
-  path: pathInput.value,
-  token: ""
+  path: pathInput.value
 };
 
 async function loadFromSite() {
@@ -26,7 +28,12 @@ async function loadFromSite() {
     const text = await res.text();
     editor.value = text;
   } catch (err) {
-    editor.value = "// Não foi possível carregar menu-data.js automaticamente.\n" +
+    if (Array.isArray(window.MENU_DATA)) {
+      editor.value = `window.MENU_DATA = ${JSON.stringify(window.MENU_DATA, null, 2)};\n`;
+      return;
+    }
+    editor.value =
+      "// Não foi possível carregar menu-data.js automaticamente.\n" +
       "// Cole o conteúdo aqui e edite.\n";
   }
 }
@@ -65,6 +72,67 @@ function saveSettings() {
   localStorage.setItem(storageKey, JSON.stringify(settings));
 }
 
+function decodeTokenFromStorage() {
+  const encoded = localStorage.getItem(tokenStorageKey);
+  if (!encoded) return "";
+  try {
+    return atob(encoded).trim();
+  } catch (_err) {
+    return "";
+  }
+}
+
+function b64ToBytes(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveKey(passphrase, saltBytes, iterations) {
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, [
+    "deriveKey"
+  ]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt: saltBytes, iterations, hash: "SHA-256" },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["decrypt"]
+  );
+}
+
+async function decryptEmbeddedToken(passphrase) {
+  if (!embeddedEncryptedToken) return "";
+  const { saltB64, ivB64, dataB64, iterations } = embeddedEncryptedToken;
+  const salt = b64ToBytes(saltB64);
+  const iv = b64ToBytes(ivB64);
+  const data = b64ToBytes(dataB64);
+  const key = await deriveKey(passphrase, salt, iterations || 210000);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+  return new TextDecoder().decode(plain).trim();
+}
+
+const keyDialog = document.getElementById("key-dialog");
+const keyInput = document.getElementById("key-input");
+let cachedPassphrase = "";
+
+async function promptForPassphrase() {
+  if (!keyDialog) return "";
+  keyInput.value = "";
+  keyDialog.showModal();
+  const result = await new Promise((resolve) => {
+    keyDialog.addEventListener(
+      "close",
+      () => resolve(keyDialog.returnValue),
+      { once: true }
+    );
+  });
+  if (result !== "ok") return "";
+  return keyInput.value || "";
+}
+
 function encodeBase64(content) {
   const bytes = new TextEncoder().encode(content);
   let binary = "";
@@ -73,10 +141,21 @@ function encodeBase64(content) {
 }
 
 async function saveToGitHub() {
-  const { owner, repo, branch, path, token } = settings;
+  const { owner, repo, branch, path } = settings;
+  let token = decodeTokenFromStorage();
+  if (!token) {
+    if (!cachedPassphrase) cachedPassphrase = await promptForPassphrase();
+    if (cachedPassphrase) {
+      try {
+        token = await decryptEmbeddedToken(cachedPassphrase);
+      } catch (_err) {
+        token = "";
+      }
+    }
+  }
 
   if (!owner || !repo || !token) {
-    alert("Token não encontrado. Defina o token no localStorage antes de salvar.");
+    alert("Token indisponível. Configure o token criptografado (embeddedEncryptedToken).");
     return;
   }
 
