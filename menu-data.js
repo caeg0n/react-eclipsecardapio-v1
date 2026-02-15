@@ -1,7 +1,7 @@
 window.MENU_DATA = [
   {
-    id: "pizzass",
-    title: "Pizzas",
+    id: "pizzas",
+    title: "Pizzassss",
     note: "Tamanhos e valores do cardápio original.",
     groups: [
       {
