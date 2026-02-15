@@ -113,7 +113,7 @@
 
 .item-actions .qty-btn {
   height: 32px;
-  min-width: 88px;
+  min-width: 92px;
   padding: 0 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -134,87 +134,37 @@
   transform: translateY(0);
 }
 
-.item-actions .add-btn {
-  width: 36px;
-  height: 36px;
+.item-muted {
+  color: #9c9c9c;
+  font-size: 0.8rem;
+}
+
+.section-actions {
+  display: flex;
+  justify-content: end;
+  margin-bottom: 12px;
+}
+
+.section-add {
   border-radius: 12px;
   border: 1px solid rgba(253, 191, 0, 0.35);
-  background: linear-gradient(
-    145deg,
-    rgba(253, 191, 0, 0.22) 0%,
-    rgba(253, 191, 0, 0.08) 60%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  color: var(--brand);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition: transform 0.14s ease, filter 0.14s ease;
-}
-
-.item-actions .add-btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-}
-
-.item-actions .add-btn:active {
-  transform: translateY(0);
-}
-
-.item-actions .add-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.qty-btn {
-  height: 38px;
-  min-width: 56px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: linear-gradient(160deg, #151515 0%, #0a0a0a 100%);
-  color: #ffffff;
+  padding: 8px 12px;
   font-weight: 900;
-  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
-}
-
-.qty-btn:hover {
-  border-color: rgba(253, 191, 0, 0.55);
-  transform: translateY(-1px);
-}
-
-.qty-btn:active {
-  transform: translateY(0);
-}
-
-.add-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid rgba(253, 191, 0, 0.35);
-  background: linear-gradient(145deg, rgba(253, 191, 0, 0.22) 0%, rgba(253, 191, 0, 0.08) 60%, rgba(0, 0, 0, 0) 100%);
-  color: var(--brand);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
+  background: linear-gradient(145deg, rgba(253, 191, 0, 0.22) 0%, rgba(253, 191, 0, 0.06) 100%);
+  color: rgba(253, 191, 0, 0.98);
   transition: transform 0.14s ease, filter 0.14s ease;
 }
 
-.add-btn:hover {
+.section-add:hover {
   transform: translateY(-1px);
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
-.add-btn:active {
+.section-add:active {
   transform: translateY(0);
 }
 
-.add-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
 
 .cart-dialog::backdrop {
   background: rgba(0, 0, 0, 0.62);
@@ -400,7 +350,7 @@
     justify-content: space-between;
   }
 
-  .qty-btn {
-    flex: 1;
+  .section-actions {
+    justify-content: center;
   }
 }

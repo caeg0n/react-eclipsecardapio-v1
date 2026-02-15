@@ -240,23 +240,9 @@
                     data-act="qty"
                     title="Clique para mudar a quantidade"
                   >
-                    Qtd: <span class="qty-val">1</span>
+                    Qtd: <span class="qty-val">0</span>
                   </button>
-                  <button
-                    class="add-btn"
-                    type="button"
-                    data-act="add"
-                    ${hasPrice ? "" : "disabled"}
-                    aria-label="Adicionar ao carrinho"
-                    title="${hasPrice ? "Adicionar ao carrinho" : "Item sem preço"}"
-                  >
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M7.3 18.3a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Zm10 0a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4ZM6.2 5.2H21a1 1 0 0 1 .98 1.2l-1.1 5.2h2.1a1 1 0 1 1 0 2h-2.6a2 2 0 0 1-1.96 1.6H9a2 2 0 0 1-1.96-1.6L5.2 3.9H2.8a1 1 0 1 1 0-2H6a1 1 0 0 1 .98.8l.22 1.5ZM8.5 12.6h10.1l.8-3.6H7.9l.6 3.6Zm9-9.1a1 1 0 0 1 1 1V6h1.6a1 1 0 1 1 0 2H18.5v1.6a1 1 0 1 1-2 0V8H15a1 1 0 1 1 0-2h1.5V4.5a1 1 0 0 1 1-1Z"
-                      />
-                    </svg>
-                  </button>
+                  ${hasPrice ? "" : `<span class="item-muted">Sem preço</span>`}
                 </div>
               </article>
             `;
@@ -291,6 +277,11 @@
         <div class="section-head">
           <h2>${escapeHtml(section.title || "")}</h2>
           ${section.note ? `<p class="section-note">${escapeHtml(section.note)}</p>` : ""}
+        </div>
+        <div class="section-actions">
+          <button class="section-add" type="button" data-act="add-section">
+            Adicionar ao carrinho
+          </button>
         </div>
         ${inner}
       </section>
@@ -328,20 +319,29 @@
         const row = btn.closest(".item");
         if (!row) return;
         const valEl = $(".qty-val", btn);
-        const cur = Number(valEl?.textContent || 1);
-        const next = cur >= 9 ? 1 : cur + 1;
+        const cur = Number(valEl?.textContent || 0);
+        const next = cur >= 9 ? 0 : cur + 1;
         valEl.textContent = String(next);
         return;
       }
 
-      if (act === "add") {
-        const row = btn.closest(".item");
-        if (!row) return;
-        const key = row.getAttribute("data-item-key");
-        const item = itemIndex.get(key);
-        if (!item) return;
-        const qty = Number($(".qty-val", row)?.textContent || 1);
-        addItemToCart(item, qty);
+      if (act === "add-section") {
+        const section = btn.closest(".menu-section");
+        if (!section) return;
+        const rows = $$(".item[data-item-key]", section);
+        let addedAny = false;
+        for (const row of rows) {
+          const key = row.getAttribute("data-item-key");
+          const item = itemIndex.get(key);
+          if (!item) continue;
+          const qty = Number($(".qty-val", row)?.textContent || 0);
+          if (!Number.isFinite(qty) || qty <= 0) continue;
+          addItemToCart(item, qty);
+          addedAny = true;
+        }
+        if (addedAny) {
+          updateCartUI();
+        }
         return;
       }
     });
