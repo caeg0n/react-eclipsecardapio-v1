@@ -1,11 +1,11 @@
 window.MENU_DATA = [
   {
     id: "pizzas",
-    title: "Pizzassss",
+    title: "Pizzas",
     note: "Tamanhos e valores do cardápio original.",
     groups: [
       {
-        title: "Tamanhosssssss",
+        title: "Tamanhos",
         items: [
           { name: "Broto (individual)", price: "R$ 25,00" },
           { name: "Pequena (4 pedaços)", price: "R$ 45,00" },
