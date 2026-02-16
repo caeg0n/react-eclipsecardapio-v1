@@ -183,17 +183,17 @@ echo [5/10] Atualizando numero de versao...
 if not exist "VERSION.txt" (
   > "VERSION.txt" echo 1
 ) else (
-  for /f %%V in (VERSION.txt) do set "VER=%%V"
-  if "%VER%"=="" set "VER=0"
-  set /a VER=%VER%+1
-  > "VERSION.txt" echo %VER%
+  set /p BUILD_VER=<VERSION.txt
+  if "!BUILD_VER!"=="" set "BUILD_VER=0"
+  set /a BUILD_VER=!BUILD_VER!+1
+  > "VERSION.txt" echo !BUILD_VER!
 )
-for /f %%V in (VERSION.txt) do set "VER=%%V"
+set /p BUILD_VER=<VERSION.txt
 powershell -NoProfile -Command ^
-  "$v='v%VER%';" ^
+  "$v='v!BUILD_VER!';" ^
   "$files=@('index.html','compras\\index.html');" ^
   "foreach($f in $files){ if(Test-Path $f){ $c=Get-Content $f -Raw; $c=$c -replace '(<span id=\"build-version\">)v?\\d+(</span>)', ('$1'+$v+'$2'); Set-Content $f $c -Encoding utf8 } }"
-echo Versao atual: v%VER%
+echo Versao atual: v!BUILD_VER!
 
 echo.
 echo [6/10] Gerando token criptografado do Admin (opcional)...
