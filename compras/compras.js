@@ -303,6 +303,11 @@
     const totalEl = $("#item-total");
     const sizeWrap = $("#item-size-wrap");
     const sizeList = $("#item-sizes");
+    const flavorWrap = $("#item-flavor-wrap");
+    const flavorPrimaryEl = $("#item-flavor-primary");
+    const halfToggle = $("#item-half-toggle");
+    const flavorSecondWrap = $("#item-flavor-second");
+    const flavorSelect = $("#item-flavor-select");
     const qtyEl = $("#item-qty");
     const addBtn = $("#item-add");
     let currentItem = null;
@@ -311,12 +316,17 @@
     let currentName = null;
     let currentKey = null;
     let currentSizeLabel = null;
+    let currentFlavorPrimary = null;
+    let currentFlavorSecond = null;
+    let isHalf = false;
 
     const pizzaSection = Array.isArray(menuData)
       ? menuData.find((s) => s && s.id === "pizzas")
       : null;
     const sizeGroup = pizzaSection?.groups?.find((g) => /tamanho/i.test(g.title || ""));
     const pizzaSizes = Array.isArray(sizeGroup?.items) ? sizeGroup.items : [];
+    const flavorGroup = pizzaSection?.groups?.find((g) => /sabor/i.test(g.title || ""));
+    const pizzaFlavors = Array.isArray(flavorGroup?.items) ? flavorGroup.items : [];
 
     function showDialogSafe(dialogEl) {
       if (!dialogEl) return;
@@ -367,8 +377,29 @@
       addBtn.disabled = false;
       addBtn.textContent = "Adicionar ao carrinho";
       currentSizeLabel = size.name || "Tamanho";
-      currentName = `${currentItem?.name || "Pizza"} - ${currentSizeLabel}`;
-      currentKey = `${currentItem?.key || "pizza"}::${currentSizeLabel}`;
+      updatePizzaNameKey();
+    }
+
+    function updatePizzaNameKey() {
+      if (currentItem?.sectionId !== "pizzas") return;
+      const sizeLabel = currentSizeLabel || "Tamanho";
+      const primary = currentFlavorPrimary || currentItem?.name || "Sabor";
+      const second = isHalf ? currentFlavorSecond : null;
+      const flavorLabel = second ? `${primary} + ${second}` : primary;
+      currentName = `Pizza ${sizeLabel} - ${flavorLabel}`;
+      currentKey = `pizza::${sizeLabel}::${flavorLabel}`;
+    }
+
+    function renderFlavorOptions(primaryName) {
+      if (!flavorSelect) return;
+      const options = pizzaFlavors
+        .map((f) => f.name || "")
+        .filter((n) => n && n !== primaryName);
+      flavorSelect.innerHTML = options
+        .map((n) => `<option value="${escapeAttr(n)}">${escapeHtml(n)}</option>`)
+        .join("");
+      currentFlavorSecond = options[0] || null;
+      if (flavorSelect.value) currentFlavorSecond = flavorSelect.value;
     }
 
     document.addEventListener("click", (e) => {
@@ -388,6 +419,10 @@
       currentName = item.name || "Item";
       currentKey = item.key;
       currentSizeLabel = null;
+      currentFlavorPrimary = item.name || null;
+      currentFlavorSecond = null;
+      isHalf = false;
+      if (halfToggle) halfToggle.checked = false;
 
       if (item.sectionId === "pizzas" && Array.isArray(pizzaSizes) && pizzaSizes.length) {
         if (sizeWrap) sizeWrap.style.display = "";
@@ -408,8 +443,13 @@
         }
         const firstSize = pizzaSizes[0];
         setPriceFromSize(firstSize);
+        if (flavorWrap) flavorWrap.style.display = "";
+        if (flavorPrimaryEl) flavorPrimaryEl.textContent = currentFlavorPrimary || "";
+        if (flavorSecondWrap) flavorSecondWrap.style.display = "none";
+        renderFlavorOptions(currentFlavorPrimary);
       } else {
         if (sizeWrap) sizeWrap.style.display = "none";
+        if (flavorWrap) flavorWrap.style.display = "none";
         const cents = parsePriceToCents(item.price);
         currentPriceCents = Number.isFinite(cents) ? cents : null;
         if (Number.isFinite(cents) && item.price) {
@@ -442,6 +482,24 @@
         sizeList.querySelectorAll(".size-chip").forEach((el) => el.classList.remove("is-active"));
         btn.classList.add("is-active");
         setPriceFromSize(size);
+      });
+    }
+
+    if (halfToggle) {
+      halfToggle.addEventListener("change", () => {
+        isHalf = !!halfToggle.checked;
+        if (flavorSecondWrap) flavorSecondWrap.style.display = isHalf ? "grid" : "none";
+        if (isHalf) {
+          renderFlavorOptions(currentFlavorPrimary);
+        }
+        updatePizzaNameKey();
+      });
+    }
+
+    if (flavorSelect) {
+      flavorSelect.addEventListener("change", () => {
+        currentFlavorSecond = flavorSelect.value || null;
+        updatePizzaNameKey();
       });
     }
 
@@ -492,7 +550,11 @@
       currentName = null;
       currentKey = null;
       currentSizeLabel = null;
+      currentFlavorPrimary = null;
+      currentFlavorSecond = null;
+      isHalf = false;
       if (sizeList) sizeList.innerHTML = "";
+      if (flavorSelect) flavorSelect.innerHTML = "";
     });
 
     // Keyboard shortcut: "c" opens cart.

@@ -245,6 +245,46 @@
   font-weight: 800;
 }
 
+.item-flavor-wrap {
+  display: grid;
+  gap: 8px;
+}
+
+.item-flavor {
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f2f2f2;
+  font-weight: 800;
+}
+
+.item-half-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #e8e8e8;
+}
+
+.item-half-toggle input {
+  accent-color: #fdbf00;
+}
+
+.item-flavor-second {
+  display: none;
+  gap: 6px;
+}
+
+.item-flavor-second select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0e0e0e;
+  color: #f2f2f2;
+}
+
 .item-total {
   display: flex;
   align-items: center;
