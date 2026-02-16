@@ -95,7 +95,7 @@
     const keys = Object.keys(cart.items || {});
     if (!keys.length) return "";
 
-    const lines = ["Olá!", "Pedido Eclipse Lanchonete e Pizzaria", "", "Itens:"];
+    const lines = ["Olá!", "Pedido Eclipse Lanchonete e Pizzaria", "Itens:"];
     keys.sort((a, b) => {
       const ia = cart.items[a];
       const ib = cart.items[b];
@@ -109,9 +109,7 @@
     }
 
     const totals = cartTotals(cart);
-    lines.push("");
     lines.push(`Total: ${formatCentsBRL(totals.totalCents)}`);
-    lines.push("");
     lines.push("Obrigado!");
 
     return lines.join("\n");
