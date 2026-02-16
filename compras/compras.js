@@ -233,17 +233,7 @@
                   ${price}
                 </div>
                 ${desc}
-                <div class="item-actions">
-                  <button
-                    class="qty-btn"
-                    type="button"
-                    data-act="qty"
-                    title="Clique para mudar a quantidade"
-                  >
-                    Qtd: <span class="qty-val">0</span>
-                  </button>
-                  ${hasPrice ? "" : `<span class="item-muted">Sem preço</span>`}
-                </div>
+                ${hasPrice ? "" : `<p class="item-desc">Sem preço</p>`}
               </article>
             `;
           })
@@ -278,11 +268,6 @@
           <h2>${escapeHtml(section.title || "")}</h2>
           ${section.note ? `<p class="section-note">${escapeHtml(section.note)}</p>` : ""}
         </div>
-        <div class="section-actions">
-          <button class="section-add" type="button" data-act="add-section">
-            Adicionar ao carrinho
-          </button>
-        </div>
         ${inner}
       </section>
     `;
@@ -310,40 +295,55 @@
   }
 
   function wireEvents(itemIndex) {
+    const dlg = $("#item-dialog");
+    const titleEl = $("#item-title");
+    const descEl = $("#item-desc");
+    const priceEl = $("#item-price");
+    const qtyEl = $("#item-qty");
+    const addBtn = $("#item-add");
+    let currentItem = null;
+    let currentQty = 1;
+
+    function setQty(next) {
+      const q = Math.max(1, Math.min(99, Number(next || 1)));
+      currentQty = q;
+      qtyEl.textContent = String(q);
+    }
+
     document.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-act]");
-      if (!btn) return;
-      const act = btn.getAttribute("data-act");
+      const itemEl = e.target.closest(".item[data-item-key]");
+      if (!itemEl) return;
+      const key = itemEl.getAttribute("data-item-key");
+      const item = itemIndex.get(key);
+      if (!item) return;
+      currentItem = item;
+      setQty(1);
 
-      if (act === "qty") {
-        const row = btn.closest(".item");
-        if (!row) return;
-        const valEl = $(".qty-val", btn);
-        const cur = Number(valEl?.textContent || 0);
-        const next = cur >= 9 ? 0 : cur + 1;
-        valEl.textContent = String(next);
-        return;
+      titleEl.textContent = item.name || "Item";
+      descEl.textContent = item.desc || "";
+      const cents = parsePriceToCents(item.price);
+      if (Number.isFinite(cents) && item.price) {
+        priceEl.textContent = item.price;
+        addBtn.disabled = false;
+        addBtn.textContent = "Adicionar ao carrinho";
+      } else {
+        priceEl.textContent = "Sem preço";
+        addBtn.disabled = true;
+        addBtn.textContent = "Indisponível";
       }
 
-      if (act === "add-section") {
-        const section = btn.closest(".menu-section");
-        if (!section) return;
-        const rows = $$(".item[data-item-key]", section);
-        let addedAny = false;
-        for (const row of rows) {
-          const key = row.getAttribute("data-item-key");
-          const item = itemIndex.get(key);
-          if (!item) continue;
-          const qty = Number($(".qty-val", row)?.textContent || 0);
-          if (!Number.isFinite(qty) || qty <= 0) continue;
-          addItemToCart(item, qty);
-          addedAny = true;
-        }
-        if (addedAny) {
-          updateCartUI();
-        }
-        return;
-      }
+      dlg.showModal();
+    });
+
+    $("#item-inc").addEventListener("click", () => setQty(currentQty + 1));
+    $("#item-dec").addEventListener("click", () => setQty(currentQty - 1));
+
+    addBtn.addEventListener("click", () => {
+      if (!currentItem) return;
+      const cents = parsePriceToCents(currentItem.price);
+      if (!Number.isFinite(cents)) return;
+      addItemToCart(currentItem, currentQty);
+      dlg.close();
     });
 
     $("#cart-open").addEventListener("click", () => {
@@ -373,6 +373,11 @@
     // Escape closes; clicking outside also closes. Keep UI in sync after close.
     $("#cart-dialog").addEventListener("close", () => {
       updateCartUI();
+    });
+
+    $("#item-dialog").addEventListener("close", () => {
+      currentItem = null;
+      currentQty = 1;
     });
 
     // Keyboard shortcut: "c" opens cart.

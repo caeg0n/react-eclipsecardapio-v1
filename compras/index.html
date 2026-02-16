@@ -94,6 +94,37 @@
 
     <footer class="reveal"></footer>
 
+    <dialog class="item-dialog" id="item-dialog" aria-label="Adicionar item">
+      <form method="dialog" class="item-card">
+        <div class="item-head">
+          <div>
+            <p class="item-kicker">Adicionar</p>
+            <h2 class="item-title" id="item-title">Item</h2>
+          </div>
+          <button class="item-close" value="close" aria-label="Fechar" type="submit">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 1 1-1.4-1.4l4.9-4.9-4.9-4.9a1 1 0 0 1 1.4-1.4l4.9 4.9 4.9-4.9a1 1 0 0 1 1.4 0Z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="item-body">
+          <p class="item-desc" id="item-desc"></p>
+          <div class="item-price" id="item-price"></div>
+          <div class="item-qty">
+            <button type="button" id="item-dec" aria-label="Diminuir">-</button>
+            <span id="item-qty">1</span>
+            <button type="button" id="item-inc" aria-label="Aumentar">+</button>
+          </div>
+        </div>
+        <div class="item-foot">
+          <button class="item-add" id="item-add" type="button">Adicionar ao carrinho</button>
+        </div>
+      </form>
+    </dialog>
+
     <dialog class="cart-dialog" id="cart-dialog" aria-label="Carrinho">
       <form method="dialog" class="cart-card">
         <div class="cart-head">
