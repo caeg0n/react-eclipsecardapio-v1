@@ -277,6 +277,7 @@
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   animation: modalIn 0.22s ease;
+  color: #f3f3f3;
 }
 
 @keyframes modalIn {
@@ -311,6 +312,7 @@
   margin: 6px 0 0;
   font-size: 1.05rem;
   letter-spacing: 0.02em;
+  color: #ffffff;
 }
 
 .cart-close {
@@ -350,7 +352,7 @@
 
 .cart-item p {
   margin: 6px 0 0;
-  color: #cfcfcf;
+  color: #dedede;
   font-size: 0.85rem;
   line-height: 1.25;
 }
@@ -372,8 +374,8 @@
   width: 28px;
   height: 28px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
   font-weight: 900;
   cursor: pointer;
@@ -383,6 +385,7 @@
   min-width: 20px;
   text-align: center;
   font-weight: 900;
+  color: #ffffff;
 }
 
 .cart-subtotal {
@@ -403,6 +406,7 @@
   align-items: baseline;
   gap: 12px;
   font-size: 0.98rem;
+  color: #f0f0f0;
 }
 
 .cart-actions {
