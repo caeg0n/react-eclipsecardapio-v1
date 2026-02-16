@@ -318,6 +318,28 @@
     const sizeGroup = pizzaSection?.groups?.find((g) => /tamanho/i.test(g.title || ""));
     const pizzaSizes = Array.isArray(sizeGroup?.items) ? sizeGroup.items : [];
 
+    function showDialogSafe(dialogEl) {
+      if (!dialogEl) return;
+      if (typeof dialogEl.showModal === "function") {
+        try {
+          dialogEl.showModal();
+          return;
+        } catch (_err) {
+          // fallback below
+        }
+      }
+      dialogEl.setAttribute("open", "");
+    }
+
+    function closeDialogSafe(dialogEl) {
+      if (!dialogEl) return;
+      if (typeof dialogEl.close === "function") {
+        dialogEl.close();
+        return;
+      }
+      dialogEl.removeAttribute("open");
+    }
+
     function setQty(next) {
       const q = Math.max(1, Math.min(99, Number(next || 1)));
       currentQty = q;
@@ -368,8 +390,9 @@
       currentSizeLabel = null;
 
       if (item.sectionId === "pizzas" && Array.isArray(pizzaSizes) && pizzaSizes.length) {
-        sizeWrap.style.display = "";
-        sizeList.innerHTML = pizzaSizes
+        if (sizeWrap) sizeWrap.style.display = "";
+        if (sizeList) {
+          sizeList.innerHTML = pizzaSizes
           .map((s, idx) => {
             const label = escapeHtml(s.name || "");
             const price = escapeHtml(s.price || "");
@@ -382,10 +405,11 @@
             `;
           })
           .join("");
+        }
         const firstSize = pizzaSizes[0];
         setPriceFromSize(firstSize);
       } else {
-        sizeWrap.style.display = "none";
+        if (sizeWrap) sizeWrap.style.display = "none";
         const cents = parsePriceToCents(item.price);
         currentPriceCents = Number.isFinite(cents) ? cents : null;
         if (Number.isFinite(cents) && item.price) {
@@ -401,23 +425,25 @@
         }
       }
 
-      dlg.showModal();
+      showDialogSafe(dlg);
     });
 
     $("#item-inc").addEventListener("click", () => setQty(currentQty + 1));
     $("#item-dec").addEventListener("click", () => setQty(currentQty - 1));
 
-    sizeList.addEventListener("click", (e) => {
-      const btn = e.target.closest("button.size-chip");
-      if (!btn) return;
-      const idx = Number(btn.getAttribute("data-idx"));
-      if (!Number.isFinite(idx)) return;
-      const size = pizzaSizes[idx];
-      if (!size) return;
-      sizeList.querySelectorAll(".size-chip").forEach((el) => el.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      setPriceFromSize(size);
-    });
+    if (sizeList) {
+      sizeList.addEventListener("click", (e) => {
+        const btn = e.target.closest("button.size-chip");
+        if (!btn) return;
+        const idx = Number(btn.getAttribute("data-idx"));
+        if (!Number.isFinite(idx)) return;
+        const size = pizzaSizes[idx];
+        if (!size) return;
+        sizeList.querySelectorAll(".size-chip").forEach((el) => el.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        setPriceFromSize(size);
+      });
+    }
 
     addBtn.addEventListener("click", () => {
       if (!currentItem) return;
@@ -427,12 +453,12 @@
         name: currentName,
         key: currentKey
       });
-      dlg.close();
+      closeDialogSafe(dlg);
     });
 
     $("#cart-open").addEventListener("click", () => {
       renderCartModal();
-      $("#cart-dialog").showModal();
+      showDialogSafe($("#cart-dialog"));
     });
 
     $("#cart-clear").addEventListener("click", () => {
@@ -466,16 +492,17 @@
       currentName = null;
       currentKey = null;
       currentSizeLabel = null;
-      sizeList.innerHTML = "";
+      if (sizeList) sizeList.innerHTML = "";
     });
 
     // Keyboard shortcut: "c" opens cart.
     document.addEventListener("keydown", (e) => {
       if (e.key.toLowerCase() === "c" && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const dlg = $("#cart-dialog");
-        if (!dlg.open) {
+        const isOpen = dlg && (dlg.open || dlg.hasAttribute("open"));
+        if (dlg && !isOpen) {
           renderCartModal();
-          dlg.showModal();
+          showDialogSafe(dlg);
           e.preventDefault();
         }
       }

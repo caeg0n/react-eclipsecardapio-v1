@@ -134,6 +134,10 @@
   max-width: min(460px, calc(100vw - 32px));
 }
 
+.item-dialog[open] {
+  display: block;
+}
+
 .item-card {
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -338,6 +342,10 @@
   padding: 0;
   background: transparent;
   max-width: min(520px, calc(100vw - 32px));
+}
+
+.cart-dialog[open] {
+  display: block;
 }
 
 .cart-card {
