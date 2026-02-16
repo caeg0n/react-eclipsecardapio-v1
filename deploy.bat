@@ -193,6 +193,7 @@ powershell -NoProfile -Command ^
   "$v='v%VER%';" ^
   "$files=@('index.html','compras\\index.html');" ^
   "foreach($f in $files){ if(Test-Path $f){ $c=Get-Content $f -Raw; $c=$c -replace '(<span id=\"build-version\">)v?\\d+(</span>)', ('$1'+$v+'$2'); Set-Content $f $c -Encoding utf8 } }"
+echo Versao atual: v%VER%
 
 echo.
 echo [6/10] Gerando token criptografado do Admin (opcional)...
