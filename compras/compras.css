@@ -2,6 +2,31 @@
   --cart: #fdbf00;
 }
 
+/* Scrollbar theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a #0b0b0b;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #0b0b0b;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 999px;
+  border: 2px solid #0b0b0b;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+
 .delivery-row {
   margin-top: 6px;
   display: flex;
