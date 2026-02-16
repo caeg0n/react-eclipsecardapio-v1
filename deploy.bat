@@ -179,7 +179,23 @@ if not exist ".gitignore" (
 )
 
 echo.
-echo [5/10] Gerando token criptografado do Admin (opcional)...
+echo [5/10] Atualizando numero de versao...
+if not exist "VERSION.txt" (
+  > "VERSION.txt" echo 1
+) else (
+  for /f %%V in (VERSION.txt) do set "VER=%%V"
+  if "%VER%"=="" set "VER=0"
+  set /a VER=%VER%+1
+  > "VERSION.txt" echo %VER%
+)
+for /f %%V in (VERSION.txt) do set "VER=%%V"
+powershell -NoProfile -Command ^
+  "$v='v%VER%';" ^
+  "$files=@('index.html','compras\\index.html');" ^
+  "foreach($f in $files){ if(Test-Path $f){ $c=Get-Content $f -Raw; $c=$c -replace '(<span id=\"build-version\">)v?\\d+(</span>)', ('$1'+$v+'$2'); Set-Content $f $c -Encoding utf8 } }"
+
+echo.
+echo [6/10] Gerando token criptografado do Admin (opcional)...
 where node >nul 2>nul
 if errorlevel 1 (
   echo Node nao encontrado. Pulando geracao do token criptografado do Admin.
@@ -225,7 +241,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [6/10] Configurando dominio customizado...
+echo [7/10] Configurando dominio customizado...
 if "%PROVISIONAL_DEPLOY%"=="1" (
   if exist "CNAME" (
     del /q "CNAME" >nul 2>nul
@@ -247,7 +263,7 @@ if "%PROVISIONAL_DEPLOY%"=="1" (
 )
 
 echo.
-echo [7/10] Commitando arquivos...
+echo [8/10] Commitando arquivos...
 git add .
 git diff --cached --quiet
 if errorlevel 1 (
@@ -257,7 +273,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [8/10] Enviando para GitHub (branch main)...
+echo [9/10] Enviando para GitHub (branch main)...
 echo Sincronizando com origin/main (pull --rebase)...
 git fetch origin >nul 2>nul
 git show-ref --verify --quiet refs/remotes/origin/main
@@ -276,7 +292,7 @@ if errorlevel 1 (
 )
 
 echo.
-echo [9/10] Ativando GitHub Pages via API...
+echo [10/10] Ativando GitHub Pages via API...
 curl -s -o "%TEMP%\gh_pages.json" -w "%%{http_code}" ^
   -X POST ^
   -H "Authorization: token %TOKEN%" ^
@@ -304,7 +320,7 @@ if "%PAGES_STATUS%"=="201" (
 del /q "%TEMP%\gh_pages.json" >nul 2>nul
 
 echo.
-echo [10/10] Publicacao concluida.
+echo [11/11] Publicacao concluida.
 if not "%DOMAIN%"=="" (
   echo URL final apos DNS: https://%DOMAIN%/
   echo.

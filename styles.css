@@ -284,6 +284,13 @@ footer {
   padding: 8px 0 20px;
 }
 
+.build-version {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .slogan {
   max-width: 1200px;
   margin: 18px auto 10px;

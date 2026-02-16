@@ -590,6 +590,13 @@
   cursor: not-allowed;
 }
 
+.build-version {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .empty-cart {
   padding: 22px 0;
   text-align: center;
