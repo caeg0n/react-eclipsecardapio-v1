@@ -91,41 +91,11 @@
     return { qty, totalCents: total };
   }
 
-  const EMOJI = {
-    pizza: "\u{1F355}",
-    burger: "\u{1F354}",
-    fries: "\u{1F35F}",
-    drink: "\u{1F964}",
-    juice: "\u{1F9C3}",
-    beer: "\u{1F37A}",
-    chicken: "\u{1F357}",
-    soup: "\u{1F372}",
-    sandwich: "\u{1F96A}",
-    sauce: "\u{1F96B}",
-    plate: "\u{1F37D}"
-  };
-
-  function pickEmoji(name) {
-    const n = String(name || "").toLowerCase();
-    if (n.includes("pizza")) return EMOJI.pizza;
-    if (n.includes("hamb") || n.includes("x-") || n.includes("x ")) return EMOJI.burger;
-    if (n.includes("batata")) return EMOJI.fries;
-    if (n.includes("refrigerante") || n.includes("coca") || n.includes("guaran")) return EMOJI.drink;
-    if (n.includes("suco")) return EMOJI.juice;
-    if (n.includes("cerveja")) return EMOJI.beer;
-    if (n.includes("porcao") || n.includes("porção")) return EMOJI.chicken;
-    if (n.includes("frango")) return EMOJI.chicken;
-    if (n.includes("caldo")) return EMOJI.soup;
-    if (n.includes("sandu")) return EMOJI.sandwich;
-    if (n.includes("molho")) return EMOJI.sauce;
-    return EMOJI.plate;
-  }
-
   function buildWhatsAppMessage(cart) {
     const keys = Object.keys(cart.items || {});
     if (!keys.length) return "";
 
-    const lines = ["Olá!", `Pedido Eclipse Lanchonete e Pizzaria ${EMOJI.pizza}`, "", "Itens:"];
+    const lines = ["Olá!", "Pedido Eclipse Lanchonete e Pizzaria", "", "Itens:"];
     keys.sort((a, b) => {
       const ia = cart.items[a];
       const ib = cart.items[b];
@@ -135,8 +105,7 @@
     for (const k of keys) {
       const it = cart.items[k];
       const subtotal = (it.qty || 0) * (it.priceCents || 0);
-      const emoji = pickEmoji(it.name);
-      lines.push(`• ${it.qty}x ${it.name} — ${formatCentsBRL(subtotal)} ${emoji}`);
+      lines.push(`• ${it.qty}x ${it.name} — ${formatCentsBRL(subtotal)}`);
     }
 
     const totals = cartTotals(cart);
